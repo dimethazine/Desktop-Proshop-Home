@@ -1,23 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Button, Row, Col, ListGroup, Image, Card } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import Message from "../components/Message";
 import { useNavigate } from "react-router";
 import CheckoutSteps from "../components/CheckoutSteps";
 import { Link } from "react-router-dom";
+import { createOrder } from "../actions/orderActions";
 
 const PlaceOrderScreen = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const orderCreate = useSelector((state) => state.orderCreate);
+  const { order, success, error } = orderCreate;
+
+  console.log(orderCreate.success);
+  console.log(orderCreate.order);
+
+  useEffect(() => {
+    if (success) {
+      navigate(`/order/${order._id}`);
+    }
+    // eslint-disable-next-line
+  }, [navigate, success]);
+
   const placeOrderHandler = () => {
     console.log("hi");
+    console.log(success);
+    dispatch(
+      createOrder({
+        orderItems: cart.cartItems,
+        shippingAddress: cart.shippingAddress,
+        paymentMethod: cart.paymentMethod,
+        itemsPrice: cart.itemsPrice,
+        shippingPrice: cart.shippingPrice,
+        taxPrice: cart.taxPrice,
+        totalPrice: cart.totalPrice,
+      })
+    );
   };
-
-  const addDecimals = (num) => {
-    return (Math.round(num * 100) / 100).toFixed(2);
-  };
-
   const cart = useSelector((state) => state.cart);
 
   cart.itemsPrice = cart.cartItems.reduce(
@@ -126,7 +147,9 @@ const PlaceOrderScreen = () => {
                   <Col>${cart.totalPrice.toFixed(2)}</Col>
                 </Row>
               </ListGroup.Item>
-
+              <ListGroup.Item>
+                {error && <Message variant="danger">{error}</Message>}
+              </ListGroup.Item>
               <ListGroup.Item>
                 <Button
                   type="button"
