@@ -17,21 +17,24 @@ const PlaceOrderScreen = () => {
   const { order, success, error } = orderCreate;
 
   const cart = useSelector((state) => state.cart);
+  const orderCart = {};
 
   const addDecimals = (num) => {
     return (Math.round(num * 100) / 100).toFixed(2);
   };
 
-  cart.itemsPrice = addDecimals(
+  orderCart.itemsPrice = addDecimals(
     cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
   );
 
-  cart.shippingPrice = addDecimals(cart.itemsPrice > 100 ? 0 : 100);
-  cart.taxPrice = addDecimals(Number((0.15 * cart.itemsPrice).toFixed(2)));
-  cart.totalPrice = (
-    Number(cart.itemsPrice) +
-    Number(cart.shippingPrice) +
-    Number(cart.taxPrice)
+  orderCart.shippingPrice = addDecimals(orderCart.itemsPrice > 100 ? 0 : 100);
+  orderCart.taxPrice = addDecimals(
+    Number((0.15 * orderCart.itemsPrice).toFixed(2))
+  );
+  orderCart.totalPrice = (
+    Number(orderCart.itemsPrice) +
+    Number(orderCart.shippingPrice) +
+    Number(orderCart.taxPrice)
   ).toFixed(2);
 
   useEffect(() => {
@@ -49,10 +52,10 @@ const PlaceOrderScreen = () => {
         orderItems: cart.cartItems,
         shippingAddress: cart.shippingAddress,
         paymentMethod: cart.paymentMethod,
-        itemsPrice: cart.itemsPrice,
-        taxPrice: cart.taxPrice,
-        shippingPrice: cart.shippingPrice,
-        totalPrice: cart.totalPrice,
+        itemsPrice: orderCart.itemsPrice,
+        taxPrice: orderCart.taxPrice,
+        shippingPrice: orderCart.shippingPrice,
+        totalPrice: orderCart.totalPrice,
       })
     );
   };
@@ -67,13 +70,10 @@ const PlaceOrderScreen = () => {
               <h2>Shipping</h2>
               <p>
                 <strong>Address:</strong>
-                {/* <Col>{cart.shippingAddress.address}</Col>
+                <Col>{cart.shippingAddress.address}</Col>
                 <Col>{cart.shippingAddress.city}</Col>
                 <Col>{cart.shippingAddress.postalCode}</Col>
-                <Col>{cart.shippingAddress.country}</Col> */}
-                {cart.shippingAddress.address}, {cart.shippingAddress.city}{" "}
-                {cart.shippingAddress.postalCode},{" "}
-                {cart.shippingAddress.country}
+                <Col>{cart.shippingAddress.country}</Col>
               </p>
             </ListGroup.Item>
 
@@ -128,28 +128,29 @@ const PlaceOrderScreen = () => {
               <ListGroup.Item>
                 <Row>
                   <Col>Items</Col>
-                  <Col>${cart.itemsPrice}</Col>
+                  <Col>${orderCart.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>
 
               <ListGroup.Item>
                 <Row>
                   <Col>Shipping</Col>
-                  <Col>${cart.shippingPrice}</Col>
+                  <Col>${orderCart.shippingPrice}</Col>
                 </Row>
+                Co
               </ListGroup.Item>
 
               <ListGroup.Item>
                 <Row>
                   <Col>Tax</Col>
-                  <Col>${cart.taxPrice}</Col>
+                  <Col>${orderCart.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
 
               <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
-                  <Col>${cart.totalPrice}</Col>
+                  <Col>${orderCart.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
