@@ -7,6 +7,7 @@ import CheckoutSteps from "../components/CheckoutSteps";
 import { Link } from "react-router-dom";
 import { createOrder } from "../actions/orderActions";
 import { USER_DETAILS_RESET } from "../constants/userConstants";
+import { ORDER_CREATE_RESET } from "../constants/orderConstants";
 
 const PlaceOrderScreen = () => {
   const dispatch = useDispatch();
@@ -14,20 +15,35 @@ const PlaceOrderScreen = () => {
 
   const orderCreate = useSelector((state) => state.orderCreate);
   const { order, success, error } = orderCreate;
-  console.log(orderCreate.success);
-  console.log(orderCreate.order);
+
+  const cart = useSelector((state) => state.cart);
+
+  const addDecimals = (num) => {
+    return (Math.round(num * 100) / 100).toFixed(2);
+  };
+
+  cart.itemsPrice = addDecimals(
+    cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
+  );
+
+  cart.shippingPrice = addDecimals(cart.itemsPrice > 100 ? 0 : 100);
+  cart.taxPrice = addDecimals(Number((0.15 * cart.itemsPrice).toFixed(2)));
+  cart.totalPrice = (
+    Number(cart.itemsPrice) +
+    Number(cart.shippingPrice) +
+    Number(cart.taxPrice)
+  ).toFixed(2);
 
   useEffect(() => {
     if (success) {
       navigate(`/order/${order._id}`);
       dispatch({ type: USER_DETAILS_RESET });
+      dispatch({ type: ORDER_CREATE_RESET });
     }
     // eslint-disable-next-line
   }, [navigate, success]);
 
   const placeOrderHandler = () => {
-    console.log("hi");
-    console.log(success);
     dispatch(
       createOrder({
         orderItems: cart.cartItems,
@@ -41,19 +57,6 @@ const PlaceOrderScreen = () => {
     );
   };
 
-  const cart = useSelector((state) => state.cart);
-
-  cart.itemsPrice = cart.cartItems.reduce(
-    (acc, item) => acc + item.price * item.qty,
-    0
-  );
-
-  cart.shippingPrice = cart.itemsPrice > 100 ? 0 : 15;
-
-  cart.taxPrice = cart.itemsPrice * 0.07;
-
-  cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice;
-
   return (
     <>
       <CheckoutSteps step1 step2 step3 step4 />
@@ -64,10 +67,13 @@ const PlaceOrderScreen = () => {
               <h2>Shipping</h2>
               <p>
                 <strong>Address:</strong>
-                <Col>{cart.shippingAddress.address}</Col>
+                {/* <Col>{cart.shippingAddress.address}</Col>
                 <Col>{cart.shippingAddress.city}</Col>
                 <Col>{cart.shippingAddress.postalCode}</Col>
-                <Col>{cart.shippingAddress.country}</Col>
+                <Col>{cart.shippingAddress.country}</Col> */}
+                {cart.shippingAddress.address}, {cart.shippingAddress.city}{" "}
+                {cart.shippingAddress.postalCode},{" "}
+                {cart.shippingAddress.country}
               </p>
             </ListGroup.Item>
 
@@ -87,25 +93,22 @@ const PlaceOrderScreen = () => {
                     <ListGroup.Item key={index}>
                       <Row>
                         <Col md={2}>
-                          <Link to={`/product/${item.product}`}>
-                            <Image
-                              src={item.image}
-                              alt={item.name}
-                              fluid
-                              rounded
-                            />
-                          </Link>
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fluid
+                            rounded
+                          />
                         </Col>
 
-                        <Col md={6}>
+                        <Col>
                           <Link to={`/product/${item.product}`}>
                             {item.name}
                           </Link>
                         </Col>
 
                         <Col md={4}>
-                          {item.qty} x {item.price.toFixed(2)} = $
-                          {(item.qty * item.price).toFixed(2)}
+                          {item.qty} x ${item.price} = ${item.qty * item.price}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -125,7 +128,7 @@ const PlaceOrderScreen = () => {
               <ListGroup.Item>
                 <Row>
                   <Col>Items</Col>
-                  <Col>${cart.itemsPrice.toFixed(2)}</Col>
+                  <Col>${cart.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>
 
@@ -139,14 +142,14 @@ const PlaceOrderScreen = () => {
               <ListGroup.Item>
                 <Row>
                   <Col>Tax</Col>
-                  <Col>${cart.taxPrice.toFixed(2)}</Col>
+                  <Col>${cart.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
 
               <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
-                  <Col>${cart.totalPrice.toFixed(2)}</Col>
+                  <Col>${cart.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
