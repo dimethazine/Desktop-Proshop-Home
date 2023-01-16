@@ -39,7 +39,7 @@ const ProfileScreen = () => {
     if (!userInfo) {
       navigate("/login");
     } else {
-      if (!user.name || user.name !== userInfo.name) {
+      if (!user || !user.name || user.name !== userInfo.name || success) {
         dispatch(getUserDetails("profile"));
         dispatch(listMyOrders());
       } else {
@@ -47,7 +47,7 @@ const ProfileScreen = () => {
         setEmail(user.email);
       }
     }
-  }, [navigate, userInfo, dispatch, user]);
+  }, [navigate, userInfo, dispatch, user, success]);
 
   useLayoutEffect(
     () => () => {
